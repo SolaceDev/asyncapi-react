@@ -9,9 +9,10 @@ import {
   NavigationHeaderH1,
   NavigationHeaderIcon,
   NavigationHeaderAsyncApiText,
-  NavigationHeaderEditorText,
   NavigationLinks,
 } from './styled';
+
+import { solaceFeatureFlags } from '../solace-overides';
 
 interface IconData extends Icon {
   key: string;
@@ -46,17 +47,16 @@ const NavigationComponent: React.StatelessComponent = () => {
             src="https://avatars0.githubusercontent.com/u/16401334?v=4&s=200"
             alt="AsyncAPI logo"
           />
-          <NavigationHeaderAsyncApiText>
-            AsyncAPI React
-          </NavigationHeaderAsyncApiText>
-          <NavigationHeaderEditorText>editor</NavigationHeaderEditorText>
+          <NavigationHeaderAsyncApiText>AsyncAPI</NavigationHeaderAsyncApiText>
         </NavigationHeaderH1>
       </NavigationHeader>
-      <NavigationLinks>
-        {iconsData.map(icon => (
-          <IconComponent {...icon} key={icon.key} />
-        ))}
-      </NavigationLinks>
+      {solaceFeatureFlags.SHOW_EXTERNAL_NAV_LINKS && (
+        <NavigationLinks>
+          {iconsData.map(icon => (
+            <IconComponent {...icon} key={icon.key} />
+          ))}
+        </NavigationLinks>
+      )}
     </NavigationWrapper>
   );
 };

@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import AsyncApi, { ConfigInterface } from '@asyncapi/react-component';
+import { solaceFeatureFlags } from './solace-overides';
+import sample from './test.json';
 
 import {
   Navigation,
@@ -24,6 +26,8 @@ interface State {
   config: string;
   schemaFromExternalResource: string;
   refreshing: boolean;
+  maasId: string;
+  eapId: string;
 }
 
 class Playground extends Component<{}, State> {
@@ -31,10 +35,12 @@ class Playground extends Component<{}, State> {
   updateConfigFn: (value: string) => void;
 
   state = {
-    schema: defaultSchema,
+    schema: '',
     config: defaultConfig,
     schemaFromExternalResource: '',
     refreshing: false,
+    maasId: '',
+    eapId: '',
   };
 
   constructor(props: any) {
@@ -53,7 +59,27 @@ class Playground extends Component<{}, State> {
     );
   }
 
+  componentDidMount() {
+    const url = new URL(window.location.href);
+
+    // console.log(url);
+    // console.log(url.searchParams.get('orgId'));
+    // console.log(url.searchParams.get('eapId'));
+
+    const paths = url.pathname.split('/');
+    console.log(paths);
+
+    this.setState({
+      maasId: paths[2] ?? '',
+      eapId: paths[3] ?? '',
+      schema: JSON.stringify(sample) ?? defaultSchema,
+    });
+  }
+
   render() {
+    console.log(this.state);
+    console.log(sample);
+
     const { schema, config, schemaFromExternalResource } = this.state;
     const parsedConfig = parse<ConfigInterface>(config || defaultConfig);
 
@@ -61,33 +87,38 @@ class Playground extends Component<{}, State> {
       <PlaygroundWrapper>
         <Navigation />
         <SplitWrapper>
-          <CodeEditorsWrapper>
-            <Tabs
-              additionalHeaderContent={this.renderAdditionalHeaderContent()}
-            >
-              <Tab title="Schema" key="Schema">
-                <>
-                  <FetchSchema
-                    parentCallback={this.updateSchemaFromExternalResource}
-                  />
-                  <CodeEditorComponent
-                    key="Schema"
-                    code={schema}
-                    externalResource={schemaFromExternalResource}
-                    parentCallback={this.updateSchemaFn}
-                    mode="text/yaml"
-                  />
-                </>
-              </Tab>
-              <Tab title="Configuration" key="Configuration">
-                <CodeEditorComponent
-                  key="Configuration"
-                  code={config}
-                  parentCallback={this.updateConfigFn}
-                />
-              </Tab>
-            </Tabs>
-          </CodeEditorsWrapper>
+          <React.Fragment>
+            {solaceFeatureFlags.SHOW_CODE_EDITOR && (
+              <CodeEditorsWrapper>
+                <Tabs
+                  additionalHeaderContent={this.renderAdditionalHeaderContent()}
+                >
+                  <Tab title="Schema" key="Schema">
+                    <>
+                      <FetchSchema
+                        parentCallback={this.updateSchemaFromExternalResource}
+                      />
+                      <CodeEditorComponent
+                        key="Schema"
+                        code={schema}
+                        externalResource={schemaFromExternalResource}
+                        parentCallback={this.updateSchemaFn}
+                        mode="text/yaml"
+                      />
+                    </>
+                  </Tab>
+                  <Tab title="Configuration" key="Configuration">
+                    <CodeEditorComponent
+                      key="Configuration"
+                      code={config}
+                      parentCallback={this.updateConfigFn}
+                    />
+                  </Tab>
+                </Tabs>
+              </CodeEditorsWrapper>
+            )}
+          </React.Fragment>
+
           <AsyncApiWrapper>
             <AsyncApi schema={schema} config={parsedConfig} />
           </AsyncApiWrapper>

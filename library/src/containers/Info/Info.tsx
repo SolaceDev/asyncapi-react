@@ -8,6 +8,7 @@ import { DefaultContentTypeComponent } from './DefaultContentType';
 import { Markdown, CollapseButton } from '../../components';
 import { bemClasses } from '../../helpers';
 import { Info, DefaultContentType } from '../../types';
+import { DOWNLOAD_YAML, DOWNLOAD_JSON } from '../../constants';
 
 interface Props {
   info: Info;
@@ -41,6 +42,26 @@ export const InfoComponent: React.FunctionComponent<Props> = ({
               </span>
             )}
           </h1>
+
+          <button
+            className={bemClasses.element(`collapse-button`)}
+            onClick={() => console.log('Download')}
+            style={{
+              marginRight: '16px',
+            }}
+          >
+            <span>{DOWNLOAD_JSON}</span>
+          </button>
+          <button
+            className={bemClasses.element(`collapse-button`)}
+            onClick={() => console.log('Download ')}
+            style={{
+              marginRight: '16px',
+            }}
+          >
+            <span>{DOWNLOAD_YAML}</span>
+          </button>
+
           <CollapseButton />
         </div>
         {!showInfoList ? null : (
