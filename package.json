@@ -14,10 +14,10 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "clean": "lerna clean",
-    "start": "cd library npm link && cd .. && npm link npm link @asyncapi/react-component && lerna exec --parallel -- npm run start",
+    "start": "lerna exec --parallel -- npm run start",
     "test": "cd library && npm test",
     "testWatch": "cd library && npm run test -- --watchAll",
-    "build": "cd library npm link && cd .. && npm link npm link @asyncapi/react-component && npm run build:library && npm run build:webcomponent && npm run build:playground",
+    "build": "npm run build:library && npm run build:webcomponent && npm run build:playground",
     "build:library": "cd library && npm run prepare",
     "build:webcomponent": "cd web-component && npm run prepare",
     "build:playground": "cd playground && npm run build",
