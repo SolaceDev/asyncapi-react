@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import AsyncApi, { ConfigInterface } from '@asyncapi/react-component';
 import { solaceFeatureFlags } from './solace-overides';
-import sample from './test.json';
 
 import {
   Navigation,
@@ -17,9 +16,21 @@ import {
 } from './components';
 
 import { defaultConfig, parse, debounce } from './common';
-import * as specs from './specs';
 
-const defaultSchema = specs.streetlights;
+const placeholder = {
+  components: {
+    schemas: {},
+    messages: {},
+  },
+  servers: {},
+  channels: {},
+  asyncapi: '2.0.0',
+  info: {
+    description: '',
+    title: 'Placeholder',
+    version: '0',
+  },
+};
 
 interface State {
   schema: string;
@@ -35,7 +46,7 @@ class Playground extends Component<{}, State> {
   updateConfigFn: (value: string) => void;
 
   state = {
-    schema: '',
+    schema: JSON.stringify(placeholder),
     config: defaultConfig,
     schemaFromExternalResource: '',
     refreshing: false,
@@ -59,26 +70,52 @@ class Playground extends Component<{}, State> {
     );
   }
 
+  /*
+  function useDownloadAsyncApi(id: string) {
+    const axios = useAxios();
+    const mutation = useMutation((preview: AsyncApiPreview) =>
+      axios.post(`api/v0/eventPortal/apiProducts/${id}/previewAsyncApi?format=${preview.format}`, preview.request)
+    );
+    return mutation;
+  }
+
+
+	saveAsyncApi(downloadAsyncApi.data);
+	const saveAsyncApi = React.useCallback(
+		(asyncApi) => {
+			const contentType = asyncApi.headers["content-type"];
+			let blob;
+			if (contentType === "application/json") {
+				const json = JSON.stringify(asyncApi.data, undefined, 2);
+				blob = new Blob([json], { type: contentType });
+			} else {
+				blob = new Blob([asyncApi.data], { type: contentType });
+			}
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.download = `${product.name}.${contentType === "application/json" ? "json" : "yaml"}`;
+			a.href = url;
+			a.rel = "noopener";
+			setTimeout(function () {
+				URL.revokeObjectURL(a.href);
+			}, 10000);
+			setTimeout(function () {
+				a.dispatchEvent(new MouseEvent("click"));
+			}, 0);
+			closeModal();
+		},
+		[closeModal, product.name]
+	);
+
+  */
+
   componentDidMount() {
-    const url = new URL(window.location.href);
-
-    // console.log(url);
-    // console.log(url.searchParams.get('orgId'));
-    // console.log(url.searchParams.get('eapId'));
-
-    const paths = url.pathname.split('/');
-    console.log(paths);
-
-    this.setState({
-      maasId: paths[2] ?? '',
-      eapId: paths[3] ?? '',
-      schema: JSON.stringify(sample) ?? defaultSchema,
-    });
+    this.getSchema();
   }
 
   render() {
-    console.log(this.state);
-    console.log(sample);
+    // console.log(this.state);
+    // console.log(sample);
 
     const { schema, config, schemaFromExternalResource } = this.state;
     const parsedConfig = parse<ConfigInterface>(config || defaultConfig);
@@ -126,6 +163,39 @@ class Playground extends Component<{}, State> {
       </PlaygroundWrapper>
     );
   }
+
+  private getSchema = async () => {
+    const url = new URL(window.location.href);
+
+    // console.log(url);
+    // console.log(url.searchParams.get('orgId'));
+    // console.log(url.searchParams.get('eapId'));
+
+    const paths = url.pathname.split('/');
+    console.log(paths);
+
+    this.startRefreshing();
+
+    fetch('http://localhost:3001/sample-async-api.json', {
+      method: 'GET',
+      mode: 'no-cors',
+      credentials: 'omit',
+    })
+      .then(response => response.json())
+      .then(data => {
+        this.setState({
+          // maasId: paths[2] ?? '',
+          // eapId: paths[3] ?? '',
+          schema: JSON.stringify(data) ?? {},
+        });
+      })
+      .catch(error => {
+        console.error(error);
+      })
+      .finally(() => {
+        this.stopRefreshing();
+      });
+  };
 
   private updateSchema = (schema: string) => {
     this.setState({ schema });
