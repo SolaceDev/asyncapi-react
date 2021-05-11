@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Router, Route, Switch } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import Playground from './Playground';
 
@@ -12,4 +14,15 @@ if (process.env.NODE_ENV === 'development') {
   worker.start();
 }
 
-ReactDOM.render(<Playground />, document.getElementById('root'));
+const history = createBrowserHistory();
+
+ReactDOM.render(
+  <Router history={history}>
+    <Switch>
+      <Route exact path="/:maasId/:eapId" component={Playground} />
+      <Route exact path="/:eapId" component={Playground} />
+      <Route path="/" component={Playground} />
+    </Switch>
+  </Router>,
+  document.getElementById('root'),
+);

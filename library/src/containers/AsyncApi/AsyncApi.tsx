@@ -118,6 +118,7 @@ class AsyncApiComponent extends Component<AsyncApiProps, AsyncAPIState> {
               <InfoComponent
                 info={validatedSchema.info}
                 defaultContentType={validatedSchema.defaultContentType}
+                downloadAsyncApi={this.props.downloadAsyncApi}
               />
             )}
             {concatenatedConfig.show.channels && validatedSchema.channels && (

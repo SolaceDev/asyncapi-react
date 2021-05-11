@@ -13,15 +13,27 @@ import { DOWNLOAD_YAML, DOWNLOAD_JSON } from '../../constants';
 interface Props {
   info: Info;
   defaultContentType?: DefaultContentType;
+  downloadAsyncApi?: (format: 'yaml' | 'json') => void;
 }
 
 export const InfoComponent: React.FunctionComponent<Props> = ({
   info: { title, version, description, termsOfService, contact, license },
+  downloadAsyncApi,
   defaultContentType,
 }) => {
   const className = `info`;
   const showInfoList =
     defaultContentType || termsOfService || license || contact;
+
+  const handleDownloadAsyncApi = (
+    e: React.SyntheticEvent,
+    format: 'yaml' | 'json',
+  ) => {
+    e.preventDefault();
+    if (downloadAsyncApi) {
+      downloadAsyncApi(format);
+    }
+  };
 
   return (
     <section
@@ -45,7 +57,7 @@ export const InfoComponent: React.FunctionComponent<Props> = ({
 
           <button
             className={bemClasses.element(`collapse-button`)}
-            onClick={() => console.log('Download')}
+            onClick={e => handleDownloadAsyncApi(e, 'json')}
             style={{
               marginRight: '16px',
             }}
@@ -54,7 +66,7 @@ export const InfoComponent: React.FunctionComponent<Props> = ({
           </button>
           <button
             className={bemClasses.element(`collapse-button`)}
-            onClick={() => console.log('Download ')}
+            onClick={e => handleDownloadAsyncApi(e, 'yaml')}
             style={{
               marginRight: '16px',
             }}

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import AsyncApi, { ConfigInterface } from '@asyncapi/react-component';
 import { solaceFeatureFlags } from './solace-overides';
 
@@ -26,8 +27,8 @@ const placeholder = {
   channels: {},
   asyncapi: '2.0.0',
   info: {
-    description: '',
-    title: 'Placeholder',
+    description: 'Please upload an AsyncAPI',
+    title: 'No AsyncAPI',
     version: '0',
   },
 };
@@ -41,7 +42,7 @@ interface State {
   eapId: string;
 }
 
-class Playground extends Component<{}, State> {
+class Playground extends Component<RouteComponentProps, State> {
   updateSchemaFn: (value: string) => void;
   updateConfigFn: (value: string) => void;
 
@@ -70,53 +71,7 @@ class Playground extends Component<{}, State> {
     );
   }
 
-  /*
-  function useDownloadAsyncApi(id: string) {
-    const axios = useAxios();
-    const mutation = useMutation((preview: AsyncApiPreview) =>
-      axios.post(`api/v0/eventPortal/apiProducts/${id}/previewAsyncApi?format=${preview.format}`, preview.request)
-    );
-    return mutation;
-  }
-
-
-	saveAsyncApi(downloadAsyncApi.data);
-	const saveAsyncApi = React.useCallback(
-		(asyncApi) => {
-			const contentType = asyncApi.headers["content-type"];
-			let blob;
-			if (contentType === "application/json") {
-				const json = JSON.stringify(asyncApi.data, undefined, 2);
-				blob = new Blob([json], { type: contentType });
-			} else {
-				blob = new Blob([asyncApi.data], { type: contentType });
-			}
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.download = `${product.name}.${contentType === "application/json" ? "json" : "yaml"}`;
-			a.href = url;
-			a.rel = "noopener";
-			setTimeout(function () {
-				URL.revokeObjectURL(a.href);
-			}, 10000);
-			setTimeout(function () {
-				a.dispatchEvent(new MouseEvent("click"));
-			}, 0);
-			closeModal();
-		},
-		[closeModal, product.name]
-	);
-
-  */
-
-  componentDidMount() {
-    this.getSchema();
-  }
-
   render() {
-    // console.log(this.state);
-    // console.log(sample);
-
     const { schema, config, schemaFromExternalResource } = this.state;
     const parsedConfig = parse<ConfigInterface>(config || defaultConfig);
 
@@ -157,36 +112,64 @@ class Playground extends Component<{}, State> {
           </React.Fragment>
 
           <AsyncApiWrapper>
-            <AsyncApi schema={schema} config={parsedConfig} />
+            <AsyncApi
+              schema={schema}
+              config={parsedConfig}
+              downloadAsyncApi={this.downloadAsyncApi}
+            />
           </AsyncApiWrapper>
         </SplitWrapper>
       </PlaygroundWrapper>
     );
   }
 
+  componentDidMount() {
+    this.getSchema();
+  }
+
+  downloadAsyncApi = (format: 'yaml' | 'json') => {
+    const link = document.createElement('a');
+    link.href = `/asyncapi/${this.state.eapId}/asyncapi.${format}`;
+    link.setAttribute('download', `asyncapi.${format}`);
+
+    // Append to html link element page
+    document.body.appendChild(link);
+
+    // Start download
+    link.click();
+
+    // Clean up and remove the link
+    link?.parentNode?.removeChild(link);
+  };
+
   private getSchema = async () => {
-    const url = new URL(window.location.href);
+    const {
+      match: { params },
+    } = this.props;
 
-    // console.log(url);
-    // console.log(url.searchParams.get('orgId'));
-    // console.log(url.searchParams.get('eapId'));
+    const { maasId, eapId }: any = params;
 
-    const paths = url.pathname.split('/');
-    console.log(paths);
+    const url = `/asyncapi${maasId ? '/' + maasId : ''}${
+      eapId ? '/' + eapId : ''
+    }/asyncapi.json`;
+
+    console.log('maasId: ', maasId);
+    console.log('eapId: ', eapId);
+    console.log('asynAPI-URL: ', url);
 
     this.startRefreshing();
 
-    fetch('http://localhost:3001/sample-async-api.json', {
-      method: 'GET',
-      mode: 'no-cors',
-      credentials: 'omit',
-    })
+    if (!eapId) {
+      return;
+    }
+
+    fetch(url)
       .then(response => response.json())
       .then(data => {
         this.setState({
-          // maasId: paths[2] ?? '',
-          // eapId: paths[3] ?? '',
-          schema: JSON.stringify(data) ?? {},
+          maasId,
+          eapId,
+          schema: JSON.stringify(data ?? placeholder),
         });
       })
       .catch(error => {

@@ -378,6 +378,7 @@ export type PropsSchema = string | FetchingSchemaInterface | any; // any for JSO
 export interface AsyncApiProps {
   schema: PropsSchema;
   config?: Partial<ConfigInterface>;
+  downloadAsyncApi?: (format: 'yaml' | 'json') => void;
 }
 
 export type NullableAsyncApi = AsyncAPI | null;
