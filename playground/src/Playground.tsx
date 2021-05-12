@@ -129,7 +129,10 @@ class Playground extends Component<RouteComponentProps, State> {
 
   downloadAsyncApi = (format: 'yaml' | 'json') => {
     const link = document.createElement('a');
-    link.href = `/asyncapi/${this.state.eapId}/asyncapi.${format}`;
+
+    link.href = `/asyncapi${this.state.maasId ? '/' + this.state.maasId : ''}${
+      this.state.eapId ? '/' + this.state.eapId : ''
+    }/asyncapi.${format}`;
     link.setAttribute('download', `asyncapi.${format}`);
 
     // Append to html link element page
@@ -146,8 +149,11 @@ class Playground extends Component<RouteComponentProps, State> {
     const {
       match: { params },
     } = this.props;
-
     const { maasId, eapId }: any = params;
+
+    if (!eapId) {
+      return;
+    }
 
     const url = `/asyncapi${maasId ? '/' + maasId : ''}${
       eapId ? '/' + eapId : ''
@@ -158,10 +164,6 @@ class Playground extends Component<RouteComponentProps, State> {
     console.log('asynAPI-URL: ', url);
 
     this.startRefreshing();
-
-    if (!eapId) {
-      return;
-    }
 
     fetch(url)
       .then(response => response.json())
