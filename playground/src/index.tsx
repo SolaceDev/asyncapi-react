@@ -9,6 +9,8 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import '@asyncapi/react-component/lib/styles/fiori.css';
 import './common/icons';
 
+import './index.css';
+
 if (process.env.NODE_ENV === 'development') {
   const { worker } = require('./mocks/browser');
   worker.start();

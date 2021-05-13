@@ -14,10 +14,10 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "clean": "lerna clean",
-    "start": "lerna exec --parallel -- npm run start",
+    "start": "npm run link:library && lerna exec --parallel -- npm run start",
     "test": "cd library && npm test",
     "testWatch": "cd library && npm run test -- --watchAll",
-    "build": "npm run build:library && npm run build:webcomponent && npm run build:playground",
+    "build": "npm run link:library && npm run build:library && npm run build:webcomponent && npm run build:playground",
     "build:library": "cd library && npm run prepare",
     "build:webcomponent": "cd web-component && npm run prepare",
     "build:playground": "cd playground && npm run build",
@@ -35,13 +35,18 @@
     "bump:lib:version": "cd library && npm --no-git-tag-version --allow-same-version version $VERSION",
     "bump:version": "npm run bump:lib:version && npm run bump:webcomp:version && npm run bump:playground:version && npm run install:reactcomp:webcomponent && npm run install:reactcomp:playground",
     "install:reactcomp:playground": "cd playground && npm run install:reactcomp",
-    "install:reactcomp:webcomponent": "cd web-component && npm run install:reactcomp"
+    "install:reactcomp:webcomponent": "cd web-component && npm run install:reactcomp",
+    "link:library": "cd library && npm link && cd .. && cd playground && npm link @asyncapi/react-component && cd ..",
+    "deploy": "node deployment/deploy.js",
+    "invalidate": "node deployment/invalidate.js",
+    "deploy:development-apiproduct": "npm run build; npm run deploy -- --bucket development-apiproduct; npm run invalidate -- --bucket development-apiproduct"
   },
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^8.0.1",
     "@semantic-release/github": "^7.0.4",
     "@semantic-release/npm": "^7.0.3",
     "@semantic-release/release-notes-generator": "^9.0.1",
+    "aws-sdk": "^2.906.0",
     "conventional-changelog-conventionalcommits": "^4.4.0",
     "husky": "^2.4.1",
     "lerna": "^3.22.1",
