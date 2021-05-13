@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 
 import Playground from './Playground';
@@ -21,9 +21,12 @@ const history = createBrowserHistory();
 ReactDOM.render(
   <Router history={history}>
     <Switch>
-      <Route exact path="/:maasId/:eapId" component={Playground} />
-      <Route exact path="/:eapId" component={Playground} />
-      <Route path="/" component={Playground} />
+      <Route exact path="/website/:maasId/:eapId" component={Playground} />
+      <Route exact path="/website/:eapId" component={Playground} />
+      <Route path="/website" component={Playground} />
+      <Route path="*">
+        <Redirect to="/website" />
+      </Route>
     </Switch>
   </Router>,
   document.getElementById('root'),
