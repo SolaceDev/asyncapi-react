@@ -46,13 +46,13 @@ export const InfoComponent: React.FunctionComponent<Props> = ({
             <span className={bemClasses.element(`${className}-header-title`)}>
               {title}
             </span>
-            {version && (
+            {/* {version && (
               <span
                 className={bemClasses.element(`${className}-header-version`)}
               >
                 {version}
               </span>
-            )}
+            )} */}
           </h1>
 
           <button
