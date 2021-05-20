@@ -18,21 +18,6 @@ import {
 
 import { defaultConfig, parse, debounce } from './common';
 
-const placeholder = {
-  components: {
-    schemas: {},
-    messages: {},
-  },
-  servers: {},
-  channels: {},
-  asyncapi: '2.0.0',
-  info: {
-    description: 'Please upload an AsyncAPI',
-    title: 'No AsyncAPI',
-    version: '0',
-  },
-};
-
 interface State {
   schema: string;
   config: string;
@@ -47,7 +32,7 @@ class Playground extends Component<RouteComponentProps, State> {
   updateConfigFn: (value: string) => void;
 
   state = {
-    schema: JSON.stringify(placeholder),
+    schema: '',
     config: defaultConfig,
     schemaFromExternalResource: '',
     refreshing: false,
@@ -74,51 +59,71 @@ class Playground extends Component<RouteComponentProps, State> {
   render() {
     const { schema, config, schemaFromExternalResource } = this.state;
     const parsedConfig = parse<ConfigInterface>(config || defaultConfig);
+    const isValidJsonAsyncAPI =
+      schema && typeof JSON.parse(schema) === 'object';
 
     return (
       <PlaygroundWrapper>
         <Navigation />
-        <SplitWrapper>
-          <React.Fragment>
-            {solaceFeatureFlags.SHOW_CODE_EDITOR && (
-              <CodeEditorsWrapper>
-                <Tabs
-                  additionalHeaderContent={this.renderAdditionalHeaderContent()}
-                >
-                  <Tab title="Schema" key="Schema">
-                    <>
-                      <FetchSchema
-                        parentCallback={this.updateSchemaFromExternalResource}
-                      />
-                      <CodeEditorComponent
-                        key="Schema"
-                        code={schema}
-                        externalResource={schemaFromExternalResource}
-                        parentCallback={this.updateSchemaFn}
-                        mode="text/yaml"
-                      />
-                    </>
-                  </Tab>
-                  <Tab title="Configuration" key="Configuration">
-                    <CodeEditorComponent
-                      key="Configuration"
-                      code={config}
-                      parentCallback={this.updateConfigFn}
-                    />
-                  </Tab>
-                </Tabs>
-              </CodeEditorsWrapper>
-            )}
-          </React.Fragment>
 
-          <AsyncApiWrapper>
-            <AsyncApi
-              schema={schema}
-              config={parsedConfig}
-              downloadAsyncApi={this.downloadAsyncApi}
-            />
-          </AsyncApiWrapper>
-        </SplitWrapper>
+        {!isValidJsonAsyncAPI && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: '32px',
+              fontSize: '24px',
+            }}
+          >
+            The API Product either does not exist or has no yet been hosted by
+            the API Product manager.
+          </div>
+        )}
+
+        {isValidJsonAsyncAPI && (
+          <SplitWrapper>
+            <React.Fragment>
+              {solaceFeatureFlags.SHOW_CODE_EDITOR && (
+                <CodeEditorsWrapper>
+                  <Tabs
+                    additionalHeaderContent={this.renderAdditionalHeaderContent()}
+                  >
+                    <Tab title="Schema" key="Schema">
+                      <>
+                        <FetchSchema
+                          parentCallback={this.updateSchemaFromExternalResource}
+                        />
+                        <CodeEditorComponent
+                          key="Schema"
+                          code={schema}
+                          externalResource={schemaFromExternalResource}
+                          parentCallback={this.updateSchemaFn}
+                          mode="text/yaml"
+                        />
+                      </>
+                    </Tab>
+                    <Tab title="Configuration" key="Configuration">
+                      <CodeEditorComponent
+                        key="Configuration"
+                        code={config}
+                        parentCallback={this.updateConfigFn}
+                      />
+                    </Tab>
+                  </Tabs>
+                </CodeEditorsWrapper>
+              )}
+            </React.Fragment>
+
+            <AsyncApiWrapper>
+              <AsyncApi
+                schema={schema}
+                config={parsedConfig}
+                downloadAsyncApi={this.downloadAsyncApi}
+              />
+            </AsyncApiWrapper>
+          </SplitWrapper>
+        )}
       </PlaygroundWrapper>
     );
   }
@@ -168,13 +173,15 @@ class Playground extends Component<RouteComponentProps, State> {
     fetch(url)
       .then(response => response.json())
       .then(data => {
+        console.log('data');
         this.setState({
           maasId,
           eapId,
-          schema: JSON.stringify(data ?? placeholder),
+          schema: JSON.stringify(data ?? ''),
         });
       })
       .catch(error => {
+        this.setState({ schema: '' });
         console.error(error);
       })
       .finally(() => {
