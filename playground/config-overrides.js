@@ -5,5 +5,7 @@ module.exports = function override(config, env) {
     modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
   });
 
+  config.output.publicPath = '/';
+
   return config;
 };

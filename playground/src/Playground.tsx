@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import AsyncApi, { ConfigInterface } from '@asyncapi/react-component';
+import { solaceFeatureFlags } from './solace-overides';
 
 import {
   Navigation,
@@ -15,26 +17,27 @@ import {
 } from './components';
 
 import { defaultConfig, parse, debounce } from './common';
-import * as specs from './specs';
-
-const defaultSchema = specs.streetlights;
 
 interface State {
   schema: string;
   config: string;
   schemaFromExternalResource: string;
   refreshing: boolean;
+  maasId: string;
+  eapId: string;
 }
 
-class Playground extends Component<{}, State> {
+class Playground extends Component<RouteComponentProps, State> {
   updateSchemaFn: (value: string) => void;
   updateConfigFn: (value: string) => void;
 
   state = {
-    schema: defaultSchema,
+    schema: '',
     config: defaultConfig,
     schemaFromExternalResource: '',
     refreshing: false,
+    maasId: '',
+    eapId: '',
   };
 
   constructor(props: any) {
@@ -56,45 +59,135 @@ class Playground extends Component<{}, State> {
   render() {
     const { schema, config, schemaFromExternalResource } = this.state;
     const parsedConfig = parse<ConfigInterface>(config || defaultConfig);
+    const isValidJsonAsyncAPI =
+      schema && typeof JSON.parse(schema) === 'object';
 
     return (
       <PlaygroundWrapper>
         <Navigation />
-        <SplitWrapper>
-          <CodeEditorsWrapper>
-            <Tabs
-              additionalHeaderContent={this.renderAdditionalHeaderContent()}
-            >
-              <Tab title="Schema" key="Schema">
-                <>
-                  <FetchSchema
-                    parentCallback={this.updateSchemaFromExternalResource}
-                  />
-                  <CodeEditorComponent
-                    key="Schema"
-                    code={schema}
-                    externalResource={schemaFromExternalResource}
-                    parentCallback={this.updateSchemaFn}
-                    mode="text/yaml"
-                  />
-                </>
-              </Tab>
-              <Tab title="Configuration" key="Configuration">
-                <CodeEditorComponent
-                  key="Configuration"
-                  code={config}
-                  parentCallback={this.updateConfigFn}
-                />
-              </Tab>
-            </Tabs>
-          </CodeEditorsWrapper>
-          <AsyncApiWrapper>
-            <AsyncApi schema={schema} config={parsedConfig} />
-          </AsyncApiWrapper>
-        </SplitWrapper>
+
+        {!isValidJsonAsyncAPI && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: '32px',
+              fontSize: '24px',
+            }}
+          >
+            The API Product either does not exist or has no yet been hosted by
+            the API Product manager.
+          </div>
+        )}
+
+        {isValidJsonAsyncAPI && (
+          <SplitWrapper>
+            <React.Fragment>
+              {solaceFeatureFlags.SHOW_CODE_EDITOR && (
+                <CodeEditorsWrapper>
+                  <Tabs
+                    additionalHeaderContent={this.renderAdditionalHeaderContent()}
+                  >
+                    <Tab title="Schema" key="Schema">
+                      <>
+                        <FetchSchema
+                          parentCallback={this.updateSchemaFromExternalResource}
+                        />
+                        <CodeEditorComponent
+                          key="Schema"
+                          code={schema}
+                          externalResource={schemaFromExternalResource}
+                          parentCallback={this.updateSchemaFn}
+                          mode="text/yaml"
+                        />
+                      </>
+                    </Tab>
+                    <Tab title="Configuration" key="Configuration">
+                      <CodeEditorComponent
+                        key="Configuration"
+                        code={config}
+                        parentCallback={this.updateConfigFn}
+                      />
+                    </Tab>
+                  </Tabs>
+                </CodeEditorsWrapper>
+              )}
+            </React.Fragment>
+
+            <AsyncApiWrapper>
+              <AsyncApi
+                schema={schema}
+                config={parsedConfig}
+                downloadAsyncApi={this.downloadAsyncApi}
+              />
+            </AsyncApiWrapper>
+          </SplitWrapper>
+        )}
       </PlaygroundWrapper>
     );
   }
+
+  componentDidMount() {
+    this.getSchema();
+  }
+
+  downloadAsyncApi = (format: 'yaml' | 'json') => {
+    const link = document.createElement('a');
+
+    link.href = `/asyncapi${this.state.maasId ? '/' + this.state.maasId : ''}${
+      this.state.eapId ? '/' + this.state.eapId : ''
+    }/asyncapi.${format}`;
+    link.setAttribute('download', `asyncapi.${format}`);
+
+    // Append to html link element page
+    document.body.appendChild(link);
+
+    // Start download
+    link.click();
+
+    // Clean up and remove the link
+    link?.parentNode?.removeChild(link);
+  };
+
+  private getSchema = async () => {
+    const {
+      match: { params },
+    } = this.props;
+    const { maasId, eapId }: any = params;
+
+    if (!eapId) {
+      return;
+    }
+
+    const url = `/asyncapi${maasId ? '/' + maasId : ''}${
+      eapId ? '/' + eapId : ''
+    }/asyncapi.json`;
+
+    console.log('maasId: ', maasId);
+    console.log('eapId: ', eapId);
+    console.log('asynAPI-URL: ', url);
+
+    this.startRefreshing();
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        console.log('data');
+        this.setState({
+          maasId,
+          eapId,
+          schema: JSON.stringify(data ?? ''),
+        });
+      })
+      .catch(error => {
+        this.setState({ schema: '' });
+        console.error(error);
+      })
+      .finally(() => {
+        this.stopRefreshing();
+      });
+  };
 
   private updateSchema = (schema: string) => {
     this.setState({ schema });

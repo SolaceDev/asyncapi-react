@@ -5,6 +5,8 @@ export const CONTENT_TYPES_SITE =
   'https://www.iana.org/assignments/media-types';
 export const COLLAPSE_ALL_TEXT = 'Collapse All';
 export const EXPAND_ALL_TEXT = 'Expand All';
+export const DOWNLOAD_JSON = 'Download JSON';
+export const DOWNLOAD_YAML = 'Download YAML';
 
 export const VALIDATION_ERRORS_TYPE =
   'https://github.com/asyncapi/parser-js/validation-errors';

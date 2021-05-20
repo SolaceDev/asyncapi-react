@@ -8,19 +8,32 @@ import { DefaultContentTypeComponent } from './DefaultContentType';
 import { Markdown, CollapseButton } from '../../components';
 import { bemClasses } from '../../helpers';
 import { Info, DefaultContentType } from '../../types';
+import { DOWNLOAD_YAML, DOWNLOAD_JSON } from '../../constants';
 
 interface Props {
   info: Info;
   defaultContentType?: DefaultContentType;
+  downloadAsyncApi?: (format: 'yaml' | 'json') => void;
 }
 
 export const InfoComponent: React.FunctionComponent<Props> = ({
   info: { title, version, description, termsOfService, contact, license },
+  downloadAsyncApi,
   defaultContentType,
 }) => {
   const className = `info`;
   const showInfoList =
     defaultContentType || termsOfService || license || contact;
+
+  const handleDownloadAsyncApi = (
+    e: React.SyntheticEvent,
+    format: 'yaml' | 'json',
+  ) => {
+    e.preventDefault();
+    if (downloadAsyncApi) {
+      downloadAsyncApi(format);
+    }
+  };
 
   return (
     <section
@@ -33,14 +46,34 @@ export const InfoComponent: React.FunctionComponent<Props> = ({
             <span className={bemClasses.element(`${className}-header-title`)}>
               {title}
             </span>
-            {version && (
+            {/* {version && (
               <span
                 className={bemClasses.element(`${className}-header-version`)}
               >
                 {version}
               </span>
-            )}
+            )} */}
           </h1>
+
+          <button
+            className={bemClasses.element(`collapse-button`)}
+            onClick={e => handleDownloadAsyncApi(e, 'json')}
+            style={{
+              marginRight: '16px',
+            }}
+          >
+            <span>{DOWNLOAD_JSON}</span>
+          </button>
+          <button
+            className={bemClasses.element(`collapse-button`)}
+            onClick={e => handleDownloadAsyncApi(e, 'yaml')}
+            style={{
+              marginRight: '16px',
+            }}
+          >
+            <span>{DOWNLOAD_YAML}</span>
+          </button>
+
           <CollapseButton />
         </div>
         {!showInfoList ? null : (
