@@ -76,8 +76,7 @@ class Playground extends Component<RouteComponentProps, State> {
               fontSize: '24px',
             }}
           >
-            The API Product either does not exist or has no yet been hosted by
-            the API Product manager.
+            This API Product is not available.
           </div>
         )}
 
