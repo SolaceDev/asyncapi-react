@@ -76,7 +76,7 @@ class Playground extends Component<RouteComponentProps, State> {
               fontSize: '24px',
             }}
           >
-            This API Product is unavailable.
+            This Event API Product is unavailable.
           </div>
         )}
 
