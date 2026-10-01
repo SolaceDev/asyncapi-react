@@ -29,13 +29,13 @@ jobs:
         name: Checking sentiments
         runs-on: ubuntu-latest
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
         - name: Check sentiment
-          uses: derberg/code-of-conduct-sentiment-analysis-github-action@v1
+          uses: derberg/code-of-conduct-sentiment-analysis-github-action@15d0c5da7dfb2eca7a8fdf12b4827737e4dfb862 # v1
           id: sentiments
           with:
             gcp_key: ${{ secrets.GCP_KEY_SENTIMENT }} 
-        - uses: someimportantcompany/github-actions-slack-message@v1
+        - uses: someimportantcompany/github-actions-slack-message@a975b440de2bcef178d451cc70d4c1161b5a30cd # v1
             # this step runs only if sentiment is a negative number
           if: steps.sentiments.outputs.sentiment < -0.6
           with:
