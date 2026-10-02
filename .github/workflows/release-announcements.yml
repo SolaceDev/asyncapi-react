@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Convert markdown to slack markdown for issue
-        uses: LoveToKnow/slackify-markdown-action@v1.0.0
+        uses: LoveToKnow/slackify-markdown-action@444d1c5cb9c46a046c29bb88cc032e9c27d31f38 # v1.0.0
         id: markdown
         with:
             text: "[${{github.event.release.tag_name}}](${{github.event.release.html_url}}) \n ${{ github.event.release.body }}"
       - name: Send info about release to Slack
-        uses: rtCamp/action-slack-notify@v2
+        uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2
         env:
             SLACK_WEBHOOK: ${{ secrets.SLACK_RELEASES }}
             SLACK_TITLE: Release ${{github.event.release.tag_name}} for ${{github.repository}} is out in the wild 😱💪🍾🎂
@@ -31,9 +31,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
       - name: Get version of last and previous release
-        uses: actions/github-script@v3
+        uses: actions/github-script@ffc2c79a5b2490bd33e0a41c1de74b877714d736 # v3
         id: versions
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -67,7 +67,7 @@ jobs:
         # tweet goes out even if the type is not major or minor but "You need provide version number to compare."
         # it is ok, it just means we did not identify previous version as we are tweeting out information about the release for the first time
         if: steps.releasetype.outputs.type != 'null' && steps.releasetype.outputs.type != 'patch' # null means that versions are the same
-        uses: m1ner79/Github-Twittction@v1.0.1
+        uses: m1ner79/Github-Twittction@6269f2c6ace92b904304ca33a18aebd5e5ae9ee7 # v1.0.1
         with:
           twitter_status: "Release ${{github.event.release.tag_name}} for ${{github.repository}} is out in the wild 😱💪🍾🎂\n\nThank you for the contribution ${{ steps.author.outputs.name }} ${{github.event.release.html_url}}"
           twitter_consumer_key: ${{ secrets.TWITTER_CONSUMER_KEY }} 

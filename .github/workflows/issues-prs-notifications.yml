@@ -18,12 +18,12 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Convert markdown to slack markdown for issue
-          uses: LoveToKnow/slackify-markdown-action@v1.0.0
+          uses: LoveToKnow/slackify-markdown-action@444d1c5cb9c46a046c29bb88cc032e9c27d31f38 # v1.0.0
           id: issuemarkdown
           with:
             text: "[${{github.event.issue.title}}](${{github.event.issue.html_url}}) \n ${{github.event.issue.body}}"
         - name: Send info about issue
-          uses: rtCamp/action-slack-notify@v2
+          uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2
           env:
             SLACK_WEBHOOK: ${{secrets.SLACK_GITHUB_NEWISSUEPR}}
             SLACK_TITLE: 🐛 New Issue 🐛
@@ -36,12 +36,12 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Convert markdown to slack markdown for pull request
-          uses: LoveToKnow/slackify-markdown-action@v1.0.0
+          uses: LoveToKnow/slackify-markdown-action@444d1c5cb9c46a046c29bb88cc032e9c27d31f38 # v1.0.0
           id: prmarkdown
           with:
             text: "[${{github.event.pull_request.title}}](${{github.event.pull_request.html_url}}) \n ${{github.event.pull_request.body}}"
         - name: Send info about pull request
-          uses: rtCamp/action-slack-notify@v2
+          uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2
           env:
             SLACK_WEBHOOK: ${{secrets.SLACK_GITHUB_NEWISSUEPR}}
             SLACK_TITLE: 💪 New Pull Request 💪

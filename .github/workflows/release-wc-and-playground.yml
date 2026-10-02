@@ -13,16 +13,16 @@ jobs:
     steps:
       - name: Checkout repository (@latest tag -> master branch)
         if: "!contains(github.event.release.tag_name, 'next')"
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
         with:
           ref: master
       - name: Checkout repository (@next tag -> next branch)
         if: "contains(github.event.release.tag_name, 'next')"
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
         with:
           ref: next
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1
         with:
           node-version: 14
       - name: Install latest version of library in the web-component
@@ -37,14 +37,14 @@ jobs:
         run: VERSION=${{github.event.release.tag_name}} npm run bump:webcomp:version
       - name: Release web-component to NPM (@latest tag)
         if: "!contains(github.event.release.tag_name, 'next')"
-        uses: JS-DevTools/npm-publish@v1
+        uses: JS-DevTools/npm-publish@0f451a94170d1699fd50710966d48fb26194d939 # v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
           package: ./web-component/package.json
           access: public
       - name: Release web-component to NPM (@next tag)
         if: "contains(github.event.release.tag_name, 'next')"
-        uses: JS-DevTools/npm-publish@v1
+        uses: JS-DevTools/npm-publish@0f451a94170d1699fd50710966d48fb26194d939 # v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
           package: ./web-component/package.json
@@ -57,9 +57,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1
         with:
           node-version: 14
       - name: Use latest version of react component in the playground
@@ -71,7 +71,7 @@ jobs:
         run: npm run build
         working-directory: ./playground
       - name: Deploy GH page
-        uses: JamesIves/github-pages-deploy-action@3.4.2
+        uses: JamesIves/github-pages-deploy-action@7f268ed3ea7156bd51bd958484036f70b90f5f03 # 3.4.2
         with:
           ACCESS_TOKEN: ${{ secrets.GH_TOKEN }}
           BRANCH: gh-pages
